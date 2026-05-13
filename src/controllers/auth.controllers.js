@@ -8,6 +8,7 @@ import {
   sendEmail,
 } from "../utils/mail.js";
 import jwt from "jsonwebtoken";
+import { trusted } from "mongoose";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -80,4 +81,47 @@ const registerUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser };
+const login = asyncHandler(async (req , res) => {
+  const {email , password , username} = req.body
+
+  if(!email){
+    throw new ApiError(400 , "email is required")
+  }
+
+  const user =  await User.findOne({email})
+
+  if(!user){
+    throw new ApiError(400 , "User does not exists");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password)
+
+  if(!isPasswordValid){
+    throw new ApiError(400, "Invalid Crefentials");
+  }
+
+  const {accessToken , refreshToken} =  await generateAccessAndRefreshTokens(user._id)
+
+  
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken -emailVerificationToken -emailVerificationExpiry",
+  );
+
+  const options = {
+    httpOnly: true,
+    secure: trusted
+  }
+
+  return res.status(200).cookie("accessToken" , accessToken , options).cookie("refreshToken" , refreshToken , options).json(
+    new ApiResponse(
+      200 , 
+      {
+        user: loggedInUser,
+        accessToken,
+        refreshToken
+      } , 
+      "User Logged In Successfully"
+    )
+  )
+});
+export { registerUser , login};
