@@ -12,7 +12,7 @@ const userRegisterValidator = () => {
       .withMessage("Email is Invalid"),
     body("username")
       .trim()
-      .isEmpty()
+      .notEmpty()
       .withMessage("Username is required")
       .isLowercase()
       .withMessage("Username must be in lower case")
