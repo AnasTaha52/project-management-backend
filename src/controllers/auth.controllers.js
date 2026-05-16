@@ -233,6 +233,57 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Mail has been sent to your email id"));
 });
 
+const refreshAccessToken = asyncHandler(async(req , res) => {
+  const incomingRefreshToken =  req.cookies.refreshToken || req.body.refreshToken
+
+  // token should be there
+  if(!incomingRefreshToken) {
+    throw new ApiError(401 , "Unauthorize access");
+  }
+
+  try {
+    // decoding token
+    const decodedToken =  jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+
+    const user = await user.findById(decodedToken?._id)
+    if (!user) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    // checking user in database 
+    if(incomingRefreshToken !== user?.refreshToken){
+      throw new ApiError(401, "Refresh token is expired");
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshTokens(user._id);
+
+
+    user.refreshToken = newRefreshToken
+    await user.save()
+
+    return res.status(200)
+       .cookie("accessToken" , accessToken , options)
+       .cookie("refreshToken" , refreshToken , options)
+       .json(
+        new ApiResponse(
+          200 , 
+          {accessToken, refreshToken: newRefreshToken},
+          "Access Token Refresh"
+        )
+       )
+  } catch (error) {
+      throw new ApiError(401, "invalid Refresh token");
+    
+  }
+
+})
+
 // const getCurrentUser = asyncHandler(async(req , res) => {})
 
 export {
@@ -242,4 +293,5 @@ export {
   getCurrentUser,
   verifyEmail,
   resendEmailVerification,
+  refreshAccessToken,
 };
