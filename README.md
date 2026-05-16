@@ -161,6 +161,9 @@ MAILTRAP_SMTP_HOST=sandbox.smtp.mailtrap.io
 MAILTRAP_SMTP_PORT=2525
 MAILTRAP_SMTP_USER=your_mailtrap_user
 MAILTRAP_SMTP_PASS=your_mailtrap_password
+
+# Password Reset
+FORGOT_PASSWORD_REDIRECT_URL=http://localhost:3000/forgot-password
 ```
 
 ### Environment Variable Descriptions
@@ -174,8 +177,7 @@ MAILTRAP_SMTP_PASS=your_mailtrap_password
 | `ACCESS_TOKEN_EXPIRY`  | Access token expiration time           |
 | `REFRESH_TOKEN_SECRET` | Secret for JWT refresh tokens          |
 | `REFRESH_TOKEN_EXPIRY` | Refresh token expiration time          |
-| `MAILTRAP_*`           | Email service credentials              |
-
+| `MAILTRAP_*`           | Email service credentials              || `FORGOT_PASSWORD_REDIRECT_URL` | Redirect URL for password reset page |
 ---
 
 ## 🚀 Running the Application
