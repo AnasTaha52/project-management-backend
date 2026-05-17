@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { User } from "../models/user.models.js";
 import { ApiResponse } from "../utils/api-response.js";
 import { ApiError } from "../utils/api-error.js";
@@ -164,7 +165,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   const { verificationToken } = req.params;
 
   if (!verificationToken) {
-    throw new ApiError("400", "Email verification token is missing");
+    throw new ApiError(400, "Email verification token is missing");
   }
 
   let hashedToken = crypto
@@ -178,7 +179,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   });
 
   if (!user) {
-    throw new ApiError(400, "Email verification token is missing");
+    throw new ApiError(400, "Token is invalid or expired");
   }
 
   // cleanup
@@ -239,7 +240,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   // token should be there
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "Unauthorize access");
+    throw new ApiError(401, "Unauthorized access");
   }
 
   try {
@@ -325,7 +326,7 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
 
 const resetForgotPassword = asyncHandler(async (req, res) => {
   const { resetToken } = req.params;
-  const { newPasword } = req.body;
+  const { newPassword } = req.body;
 
   let hashedToken = crypto
     .createHash("sha256")
